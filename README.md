@@ -1,4 +1,14 @@
-# Go to [https://esolangs.org/wiki/Asparagus](https://www.youtube.com/watch?v=dQw4w9WgXcQ) for the documentation
+# NOTICE: Many parts of the interpreter are unfinished!
+
+If you see a line half-written or with a syntax error, this is normal. Under no circumstance should you actively try to develop programs for this. Many of the commands are not set in stone, and even simple commands like the print equivalents change alot.
+
+Don't expect this to run properly at all, *YET*.
+
+---
+
+### Go to [https://esolangs.org/wiki/Asparagus](https://www.youtube.com/watch?v=dQw4w9WgXcQ) for the documentation
+
+Also please note that the documentation is not fully complete, either. In fact, I still have yet to update it from the most recent changes, which renders the *entire* page useless.
 <!-- ---
 #### *The following is copy-pasted from the [esolangs article](https://esolangs.org/wiki/Asparagus), which is still a work in progress...*
 ---
