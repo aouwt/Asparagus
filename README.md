@@ -1,4 +1,5 @@
----
+# Go to [https://esolangs.org/wiki/Asparagus](https://www.youtube.com/watch?v=dQw4w9WgXcQ) for the documentation
+<!-- ---
 #### *The following is copy-pasted from the [esolangs article](https://esolangs.org/wiki/Asparagus), which is still a work in progress...*
 ---
 <div>
@@ -428,4 +429,4 @@
 <pre>04 00        ..    # Inputs keypress into variable 0
 02 01 01 00  ....  # Prints variable 0 at 0,0
 05 01        ..    # Goto 0</pre>
-</div>
+</div> --!>
