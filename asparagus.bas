@@ -68,21 +68,21 @@ SUB ParseCMD
     SYSTEM
     help:
     DATA "------------------------------------------------------------"
-    DATA "Asparagus v.PB-.2.1 Nov.2020       Licensed under GNU AGPLv3"
+    DATA "Asparagus v.PB-.1.2 Nov.      2020 Licensed under GNU AGPLv3"
     DATA ""
     DATA "https://github.com/all-other-usernames-were-taken/Asparagus"
     DATA "https://esolangs.org/wiki/Asparagus"
     DATA "------------------------------------------------------------"
-    DATA "asparagus [-h] [{-f | -c}] [-wx=(width) -wy=(height)]"
-    DATA "   [-F(font ID) [--fw]] [{-v | -vv | -vvv | -s | -ss}] --"
-    DATA "   {(path to file) | (program code)}"
+    DATA "asparagus [-h] [{-f | -p}] [-wx=(width)] [-wy=(height)]"
+    DATA "   [-F(font ID) [--fw]] [-v(verbose level)]"
+    DATA "   {(code) | (path)}"
     DATA ""
     DATA ""
     DATA "-h   Displays this message then exits"
     DATA ""
     DATA "-f   Specifies to open a file"
     DATA ""
-    DATA "-c   Specifies to use data after '--' as the program"
+    DATA "-p   Specifies to use the quoted text as the program itself"
     DATA ""
     DATA "-wx, Specifies the program window size on startup"
     DATA "-wy"
@@ -91,8 +91,9 @@ SUB ParseCMD
     DATA ""
     DATA "--fw Sets the font to double width"
     DATA ""
-    DATA "-v,  Sets the verbosity level. You can use -vv, -vvv, -s and"
-    DATA "-s      -ss."
+    DATA "-v,  Sets the verbosity level with the number directly after"
+    DATA "       it. -v0=completely silent and -v7=completely not"
+    DATA "       silent"
     DATA ""
     DATA "          For more information, consult README.md"
     DATA "."
@@ -110,7 +111,7 @@ SUB IntpA1 (a$)
             '    I = I + 1
             '    PrintLog 1, "Notice: Line" + STR$(I - 1) + ": ID:" + STR$(ASC(a$, I)), I - 1
 
-            REM     Variables
+            REM Variables
 
             CASE 0 'Set [ARG1] to {ARG2} characters following it
                 Vars(ASC(a$, I + 1)) = MID$(a$, I + 3, ASC(a$, I + 2))
@@ -140,13 +141,28 @@ SUB IntpA1 (a$)
                     CASE 5: i$ = STR$(_WIDTH)
                     CASE 6: i$ = STR$(_HEIGHT)
                     CASE 7:
-                    CASE 8: i$ = _CLIPBOARD$
+                    CASE 8: IF os THEN i$ = _CLIPBOARD$ ELSE PrintLog 3, "clipboard only supported on windows :(", I
                     CASE 9: i$ = _TITLE$
                     CASE 255: i$ = a$
                     CASE ELSE: PrintLog 3, "Invalid system variable ID", I: i$ = ""
                 END SELECT
                 Vars(ASC(a$, I + 1)) = LTRIM$(RTRIM$(i$))
                 I = I + 2
+            CASE 4
+                i$ = Vars(ASC(a$, I + 1))
+                SELECT CASE ASC(a$, I + 2)
+                    CASE 0: PrintLog 4, "setting varslot via env set is not supported, use varslot instead", I
+                    CASE 1: PrintLog 2, "setting location via env set is not recommended, consider using goto instead", I: I = VAL(i$)
+                    CASE 2: PrintLog 4, "timer env variable cannot be written to", I
+                    CASE 3: PrintLog 0, "setting date to " + i$, I: DATE$ = i$
+                    CASE 4: PrintLog 0, "setting time to " + i$, I: TIME$ = i$
+                    CASE 5: WIDTH VAL(i$)
+                    CASE 6: WIDTH , VAL(i$)
+                    CASE 7:
+                    CASE 8: IF os THEN _CLIPBOARD$ = i$ ELSE PrintLog 3, "clipboard only supported on windows :(", I
+                    CASE 9: _TITLE i$
+                    CASE 255: PrintLog 4, "changing source code during execution is strongly unrecommended. remember, if the program breaks for no apparent reason after this point, it's you own goddamn fault for doing this", I: a$ = i$
+                END SELECT
 
                 REM Computations
 
@@ -201,7 +217,7 @@ SUB IntpA1 (a$)
                                 CASE ASC("7"): b$ = b$ + "111"
                                 CASE ELSE: PrintLog 6, "how does this even happen? (non-octal value on val->bin)", I
                             END SELECT
-                            Vars(ASC(a$, I + 2)) = "&B" + HEX$(VAL(Vars(ASC(a$, I + 3))))
+                            Vars(ASC(a$, I + 2)) = "&B" + b$
                         NEXT
                 END SELECT
                 I = I + 3
@@ -209,7 +225,7 @@ SUB IntpA1 (a$)
                 REM I/O
 
             CASE 20 'Print [ARG3] at {ARG1},{ARG2}
-                LOCATE ASC(a$, I + 1), ASC(a$, I + 2): PRINT Vars(ASC(a$, I + 3))
+                LOCATE ASC(a$, I + 1) - 1, ASC(a$, I + 2) - 1: PRINT Vars(ASC(a$, I + 3))
                 I = I + 3
 
             CASE 21 'Input keypress into [ARG1]
