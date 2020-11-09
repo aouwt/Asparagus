@@ -1,109 +1,15 @@
-'ON ERROR GOTO emain
-$CONSOLE
-DIM SHARED IntpVarsShared(255) AS STRING, Verbose AS _UNSIGNED _BYTE
+'$INCLUDE:'/files/aspHead.bas'
+
 ParseCMD
 
-SYSTEM
-e:
-PrintLog 6, "QB64 error #" + LTRIM$(RTRIM$(STR$(ERR))) + "on line " + LTRIM$(RTRIM$(STR$(_ERRORLINE))), I
-RESUME NEXT
-
-SUB ParseCMD
-    _DEST _CONSOLE
-    PRINT cmd$
-    Verbose = 4
-    DO
-        c~%% = c~%% + 1
-        PrintLog 0, "checking option " + COMMAND$(c~%%), -1
-        SELECT CASE LEFT$(COMMAND$(c~%%), 2)
-            CASE "-h"
-                PrintLog 0, "reading help", -1
-                RESTORE help
-                DO
-                    READ s$
-                    PRINT s$
-                LOOP UNTIL s$ = "."
-                ON ERROR GOTO e
-                SYSTEM
-            CASE "-f": isfile` = -1
-            CASE "-p": isfile` = 0
-            CASE "-w"
-                SELECT CASE LEFT$(COMMAND$(c~%%), 4)
-                    CASE "-wx=": WIDTH VAL(MID$(COMMAND$(c~%%), 4))
-                    CASE "-wy=": WIDTH , VAL(MID$(COMMAND$(c~%%), 4))
-                    CASE ELSE: PrintLog 4, "unknown window parameter '" + COMMAND$(c~%%) + "'", -1
-                END SELECT
-            CASE "-v": Verbose = VAL(MID$(COMMAND$(c~%%), 3))
-            CASE "": EXIT DO
-            CASE ELSE
-                IF ASC(COMMAND$(c~%%)) = ASC("-") THEN PrintLog 4, "unknown parameter '" + COMMAND$(c~%%) + "'", -1
-                PrintLog 0, "setting file/program to '" + COMMAND$(c~%%) + "'", -1
-                s$ = COMMAND$(c~%%)
-        END SELECT
-        ON ERROR GOTO e
-    LOOP
-    a$ = s$
-    IF isfile` THEN
-        PrintLog 0, "opening file " + s$, -1
-        f = FREEFILE
-        OPEN s$ FOR BINARY AS #f
-        ON ERROR GOTO e
-        a$ = ""
-        DO
-            GET #f, , c~%%
-            a$ = a$ + CHR$(c~%%)
-            ON ERROR GOTO e
-        LOOP UNTIL EOF(f)
-        ON ERROR GOTO e
-        CLOSE f
-    END IF
-    ON ERROR GOTO e
-    PrintLog 0, "opening window", -1
-    _SCREENSHOW
-    _DEST 0
-    PrintLog 0, "running " + a$, -1
-    IntpA1 a$
-    PrintLog 0, "done", -1
-    ON ERROR GOTO e
-    SYSTEM
-    help:
-    DATA "------------------------------------------------------------"
-    DATA "Asparagus v.PB-.1.2 Nov.      2020 Licensed under GNU AGPLv3"
-    DATA ""
-    DATA "https://github.com/all-other-usernames-were-taken/Asparagus"
-    DATA "https://esolangs.org/wiki/Asparagus"
-    DATA "------------------------------------------------------------"
-    DATA "asparagus [-h] [{-f | -p}] [-wx=(width)] [-wy=(height)]"
-    DATA "   [-F(font ID) [--fw]] [-v(verbose level)]"
-    DATA "   {(code) | (path)}"
-    DATA ""
-    DATA ""
-    DATA "-h   Displays this message then exits"
-    DATA ""
-    DATA "-f   Specifies to open a file"
-    DATA ""
-    DATA "-p   Specifies to use the quoted text as the program itself"
-    DATA ""
-    DATA "-wx, Specifies the program window size on startup"
-    DATA "-wy"
-    DATA ""
-    DATA "-F   Sets the font to use for the program window"
-    DATA ""
-    DATA "--fw Sets the font to double width"
-    DATA ""
-    DATA "-v,  Sets the verbosity level with the number directly after"
-    DATA "       it. -v0=completely silent and -v7=completely not"
-    DATA "       silent"
-    DATA ""
-    DATA "          For more information, consult README.md"
-    DATA "."
-END SUB
+'$INCLUDE:'/files/aspCommon.bas'
 
 SUB IntpA1 (a$)
     DIM I AS _UNSIGNED _INTEGER64, Vars(255) AS STRING, Subs(255) AS _UNSIGNED _INTEGER64, VarAr(255, 255) AS STRING
-    ON ERROR GOTO e
+    ON ERROR GOTO IntpErr
+    IF INSTR(_OS$, "[WINDOWS]") THEN os` = -1
     FOR I = 1 TO LEN(a$)
-        ON ERROR GOTO e
+        ON ERROR GOTO IntpErr
         c~%% = ASC(a$, I)
         PrintLog 0, "executing " + STR$(c~%%), I
         SELECT CASE c~%%
@@ -126,7 +32,7 @@ SUB IntpA1 (a$)
                 FOR i2~%% = 0 TO 255
                     VarAr(i2~%%, varslot~%%) = Vars(i2~%%)
                     Vars(i2~%%) = VarAr(i2~%%, i3~%%)
-                    IntpVarsShared(i2~%%) = VarAr(i2~%%, 255)
+                    Intp.Vars(i2~%%) = VarAr(i2~%%, 255)
                 NEXT
                 varslot~%% = i3~%%
                 I = I + 1
@@ -250,28 +156,23 @@ SUB IntpA1 (a$)
 
             CASE 34: EXIT SUB
 
+                REM Graphics
+
+            CASE 40
+
+                REM Sound
+
+            CASE 50
+
+                REM Misc
+
+            CASE 60 'System meta get
+                SELECT CASE ASC(a$, I + 1)
+                    CASE 0:
+                END SELECT
+
             CASE ELSE: PrintLog 4, "syntax", I
         END SELECT
-        ON ERROR GOTO e
+        ON ERROR GOTO IntpErr
     NEXT
-END SUB
-
-SUB PrintLog (level~%%, s$, i~&&)
-    IF Verbose <= level~%% THEN
-        a& = _DEST
-        _DEST _CONSOLE
-        s$ = " " + s$
-        SELECT CASE level~%%
-            CASE 0: PRINT "   ";
-            CASE 1: PRINT ".  ";
-            CASE 2: PRINT "!  ";
-            CASE 3: PRINT "!! ";
-            CASE 4: PRINT "!!!";
-            CASE 5: PRINT "FAT"; s$: _DEST a&: PRINT "[FATAL]"; s$: END
-            CASE 6: PRINT "###";
-            CASE ELSE: PrintLog 6, "printlog out of range", 0
-        END SELECT
-        IF i~&& > -1 THEN PRINT s$; " @ Pos"; i~&& ELSE PRINT s$
-        _DEST a&
-    END IF
 END SUB
