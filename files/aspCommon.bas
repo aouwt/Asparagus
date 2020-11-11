@@ -56,8 +56,10 @@ SUB ParseCMD
     _SCREENSHOW
     _DEST 0
     PrintLog 0, "running " + a$, -1
-    IntpA1 a$
+    ex%%=IntpA1(a$)
     PrintLog 0, "done", -1
+    _dest _console
+    print "program exited with error code ";ex%%
     ON ERROR GOTO IntpErr
     SYSTEM
 END SUB
