@@ -4,14 +4,17 @@ ParseCMD
 
 '$INCLUDE:'/files/aspCommon.bas'
 
-FUNCTION IntpA1& (a$)
+FUNCTION IntpA1& (a$) 'fucked up sorta maybe bytecode interpreter
+    'PrintLog 0, "Interpreter launched with program:", -1
+    'PrintLog 0, a$, -1
     DIM I AS _UNSIGNED _INTEGER64, Vars(255) AS STRING, Subs(255) AS _UNSIGNED _INTEGER64, VarAr(255, 255) AS STRING, os AS _BIT ', SndHandles(255) AS LONG
     ON ERROR GOTO IntpErr
     IF INSTR(_OS$, "[WINDOWS]") THEN os = -1
-    FOR I = 1 TO LEN(a$)
+    DO
+        I = I + 1
         ON ERROR GOTO IntpErr
         c~%% = ASC(a$, I)
-        PrintLog 0, "executing " + STR$(c~%%), I
+        PrintLog 0, "executing " + HEX$(c~%%), I
         SELECT CASE c~%%
             'CASE 0 'Prints to log {ARG1}
             '    I = I + 1
@@ -21,8 +24,12 @@ FUNCTION IntpA1& (a$)
 
             CASE &H00 'Set [ARG1] to {ARG2} characters following it
                 errState$ = "set var"
-                IF I + 3 + ASC(a$, I + 2) > LEN(a$) THEN PrintLog 5, "variable set past end of program", I
-                Vars(ASC(a$, I + 1)) = MID$(a$, I + 3, ASC(a$, I + 2))
+                IF I + 2 + ASC(a$, I + 2) > LEN(a$) THEN
+                    PrintLog 4, "variable set past end of program", I
+                    Vars(ASC(a$, I + 1)) = MID$(a$, I + 3)
+                ELSE
+                    Vars(ASC(a$, I + 1)) = MID$(a$, I + 3, ASC(a$, I + 2))
+                END IF
                 I = I + 2 + LEN(Vars(ASC(a$, I + 1)))
 
             CASE &H01 'Sets [ARG1] in slot [ARG2] to [ARG3] in current slot
@@ -166,7 +173,7 @@ FUNCTION IntpA1& (a$)
 
             CASE &H20 'Print [ARG3] at {ARG1},{ARG2}    'haha h20
                 errState$ = "print"
-                LOCATE ASC(a$, I + 1) - 1, ASC(a$, I + 2) - 1: PRINT Vars(ASC(a$, I + 3))
+                LOCATE ASC(a$, I + 1) + 1, ASC(a$, I + 2) + 1: PRINT Vars(ASC(a$, I + 3))
                 I = I + 3
 
             CASE &H21 'Input keypress into [ARG1]
@@ -221,11 +228,11 @@ FUNCTION IntpA1& (a$)
 
                 REM Misc
 
-            CASE ELSE: PrintLog 4, "syntax", I
+            CASE ELSE: PrintLog 4, "invalid command (" + HEX$(ASC(a$, I)) + ")", I
         END SELECT
-        PrintLog 0, errState$, I
+        IF NOT errState$ = "" THEN PrintLog 0, errState$, I
         ON ERROR GOTO IntpErr
         errState$ = ""
-    NEXT
+    LOOP UNTIL I >= LEN(a$) - 1
     IntpA1 = 0
 END SUB

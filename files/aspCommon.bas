@@ -63,11 +63,11 @@ SUB ParseCMD
     _DEST _CONSOLE
     PRINT "program exited with error code "; ex%%
     ON ERROR GOTO IntpErr
-    SYSTEM
+    'SYSTEM
 END SUB
 
 
-SUB PrintLog (level~%%, s$, i~&&)
+SUB PrintLog (level~%%, s$, i&&)' STATIC
     IF Intp.Verbose <= level~%% THEN
         a& = _DEST
         _DEST _CONSOLE
@@ -75,14 +75,14 @@ SUB PrintLog (level~%%, s$, i~&&)
         SELECT CASE level~%%
             CASE 0: PRINT "   ";
             CASE 1: PRINT ".  ";
-            CASE 2: PRINT "!  ";
-            CASE 3: PRINT "!! ";
-            CASE 4: PRINT "!!!";
-            CASE 5: PRINT "FAT"; s$: _DEST a&: PRINT "[FATAL]"; s$: END
-            CASE 6: PRINT "###";
+            CASE 2: PRINT "!  ";: warns = warns + 1
+            CASE 3: PRINT "!! ";: warns = warns + 1
+            CASE 4: PRINT "!!!";: errors = errors + 1
+            CASE 5: PRINT "FAT"; s$: _DEST a&: PRINT "[FATAL]"; s$: END: errors = errors + 1
+            CASE 6: PRINT "###";: errors = errors + 1
             CASE ELSE: PrintLog 6, "printlog out of range", 0
         END SELECT
-        IF i~&& > -1 THEN PRINT s$; " @ Pos"; i~&& ELSE PRINT s$
+        IF i&& > -1 THEN PRINT s$; " @ Pos"; i&& ELSE PRINT s$
         _DEST a&
     END IF
 END SUB
