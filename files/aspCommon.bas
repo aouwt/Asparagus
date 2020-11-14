@@ -1,11 +1,12 @@
 IntpErr:
-PrintLog 6, "QB64 error #" + LTRIM$(RTRIM$(STR$(ERR))) + "on line " + LTRIM$(RTRIM$(STR$(_ERRORLINE))), I
+PrintLog 6, "QB64 error #" + LTRIM$(RTRIM$(STR$(ERR))) + " on line " + LTRIM$(RTRIM$(STR$(_ERRORLINE))) + "(" + errstate$ + ")", -1
 RESUME NEXT
 
 SUB ParseCMD
     _DEST _CONSOLE
     PRINT cmd$
     Intp.Verbose = 4
+    IF COMMAND$(1) = "help" THEN PRINT "how about no": EXIT SUB
     DO
         c~%% = c~%% + 1
         PrintLog 0, "checking option " + COMMAND$(c~%%), -1
@@ -15,6 +16,7 @@ SUB ParseCMD
                 RESTORE Intp_Helpv3
                 DO
                     READ s$
+                    'IF s$ = "!warn" THEN PRINT warns(RND(1))
                     PRINT s$
                 LOOP UNTIL s$ = "."
                 ON ERROR GOTO IntpErr
@@ -58,8 +60,8 @@ SUB ParseCMD
     PrintLog 0, "running " + a$, -1
     ex%%=IntpA1(a$)
     PrintLog 0, "done", -1
-    _dest _console
-    print "program exited with error code ";ex%%
+    _DEST _CONSOLE
+    PRINT "program exited with error code "; ex%%
     ON ERROR GOTO IntpErr
     SYSTEM
 END SUB

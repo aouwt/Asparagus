@@ -1,11 +1,11 @@
 $CONSOLE
 
-DIM SHARED Intp.Vars(255) AS STRING, Intp.Verbose AS _UNSIGNED _BYTE
-CONST Intp.VerTx = "pre.3.1 (Nov 2020, 3)", Intp.VerNo = 10.08
+DIM SHARED Intp.Vars(255) AS STRING, Intp.Verbose AS _UNSIGNED _BYTE, errState$
+CONST Intp.VerTx = "PB-11/13", Intp.VerNo = .11013
 
 Intp_Helpv3:
-DATA "------------------------------------------------------------"
-DATA "Asparagus v.PB-.3.1 Nov.      2020 Licensed under GNU AGPLv3"
+DATA "############################################################"
+DATA "Asparagus PB-11/13                 Licensed under GNU AGPLv3"
 DATA ""
 DATA "https://github.com/all-other-usernames-were-taken/Asparagus"
 DATA "https://esolangs.org/wiki/Asparagus"
@@ -32,6 +32,7 @@ DATA "-v,  Sets the verbosity level with the number directly"
 DATA "       after it. -v0=completely silent and -v7=completely"
 DATA "       not silent"
 DATA ""
+DATA "-----------------------------------------------------------"
 DATA "          For more information, consult README.md"
+DATA "###########################################################"
 DATA "."
-
