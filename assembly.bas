@@ -1,5 +1,5 @@
 $CONSOLE:ONLY
-'$INCLUDE:'/files/commandData.bas'
+'$INCLUDE:'/files/assemblerData.bas'
 _DEST _CONSOLE
 PRINT "############################################################"
 PRINT "Asparagus Assembly (nov 15)          Licensed under GNU AGPL"
@@ -23,16 +23,18 @@ SELECT CASE COMMAND$(1)
         'print "                 shows a diagram showing how it works"
     CASE "assemble"
         OPEN COMMAND$(2) FOR INPUT AS #1
+        'DIM lbl(1024) AS labelType
         DO
             i = i + 1
             INPUT #1, s$
             s$ = UCASE$(RTRIM$(LTRIM$(s$)))
+            IF ASC(s$) = ASC(":") THEN i = i - 1: _CONTINUE
             out$ = out$ + CHR$(assembleVal(s$))
             IF s$ = "SET" THEN
                 INPUT #1, s$, a$
                 IF LEN(a$) > 255 THEN PRINT "String too long @"; i; ": "; a$: _CONTINUE
                 out$ = out$ + CHR$(assembleVal(s$)) + CHR$(LEN(a$)) + a$
-                i = i + 1 + LEN(a$)
+                i = i + 2 + LEN(a$)
             END IF
         LOOP UNTIL EOF(1)
         CLOSE 1

@@ -6,7 +6,7 @@ SUB ParseCMD
     _DEST _CONSOLE
     PRINT cmd$
     Intp.Verbose = 4
-    IF COMMAND$(1) = "help" THEN PRINT "how about no": EXIT SUB
+    IF COMMAND$(1) = "help" THEN PRINT "how about no": SYSTEM
     DO
         c~%% = c~%% + 1
         PrintLog 0, "checking option " + COMMAND$(c~%%), -1
@@ -21,8 +21,8 @@ SUB ParseCMD
                 LOOP UNTIL s$ = "."
                 ON ERROR GOTO IntpErr
                 SYSTEM
-            CASE "-f": isfile` = -1
-            CASE "-p": isfile` = 0
+            CASE "-f": isfile = -1
+            CASE "-p": isfile = 1
             CASE "-w"
                 SELECT CASE LEFT$(COMMAND$(c~%%), 4)
                     CASE "-wx=": WIDTH VAL(MID$(COMMAND$(c~%%), 4))
@@ -39,19 +39,18 @@ SUB ParseCMD
         ON ERROR GOTO IntpErr
     LOOP
     a$ = s$
-    IF isfile` THEN
+    IF isfile = -1 THEN
+        IF NOT _FILEEXISTS(s$) THEN PrintLog 5, "file does not exist", -1
         PrintLog 0, "opening file " + s$, -1
         f = FREEFILE
         OPEN s$ FOR BINARY AS #f
         ON ERROR GOTO IntpErr
-        a$ = ""
-        DO
-            GET #f, , c~%%
-            a$ = a$ + CHR$(c~%%)
-            ON ERROR GOTO IntpErr
-        LOOP UNTIL EOF(f)
+        a$ = SPACE$(LOF(f))
+        GET #f, , a$
         ON ERROR GOTO IntpErr
         CLOSE f
+    ELSEIF isfile = 0 THEN
+        PrintLog 5, "no program", -1
     END IF
     ON ERROR GOTO IntpErr
     PrintLog 0, "opening window", -1
@@ -78,7 +77,7 @@ SUB PrintLog (level~%%, s$, i&&)' STATIC
             CASE 2: PRINT "!  ";: warns = warns + 1
             CASE 3: PRINT "!! ";: warns = warns + 1
             CASE 4: PRINT "!!!";: errors = errors + 1
-            CASE 5: PRINT "FAT"; s$: _DEST a&: PRINT "[FATAL]"; s$: END: errors = errors + 1
+            CASE 5: PRINT "FAT"; s$:end': _DEST a&: PRINT "[FATAL]"; s$: END: errors = errors + 1
             CASE 6: PRINT "###";: errors = errors + 1
             CASE ELSE: PrintLog 6, "printlog out of range", 0
         END SELECT

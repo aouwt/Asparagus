@@ -1,0 +1,9 @@
+set,2,34
+set,0,Hello
+set,1,44
+string,char,0,0,1
+set,1, World!
+string,join,0,0,1
+print,0,0,0
+string,join,0,0,0
+goto,2

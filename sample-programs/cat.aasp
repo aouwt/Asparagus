@@ -1,0 +1,4 @@
+set,0,0
+key inp,1
+print,0,0,1
+goto,0
