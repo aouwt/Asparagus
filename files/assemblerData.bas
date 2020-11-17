@@ -1,7 +1,26 @@
+REM INCLUDE:'../assembly.bas'
+
 TYPE labelType
     name AS STRING
     location AS _UNSIGNED _INTEGER64
 END TYPE
+
+TYPE errorCatch
+    no AS INTEGER
+    line AS _UNSIGNED LONG
+    file AS STRING
+END TYPE
+DIM SHARED eCatch AS errorCatch
+errCatch:
+eCatch.no = ERR
+IF _INCLERRORLINE THEN
+    eCatch.line = _INCLERRORLINE
+    eCatch.file = _INCLERRORFILE$
+ELSE
+    eCatch.line = _ERRORLINE
+    eCatch.file = ""
+END IF
+RESUME NEXT
 
 assembleCmds:
 DATA 0,"LABEL"
